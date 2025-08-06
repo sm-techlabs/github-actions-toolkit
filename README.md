@@ -52,7 +52,7 @@ steps:
 ```yaml
 jobs:
   setup:
-    uses: sm-techlabs/github-actions-toolkit/.github/workflows/my-workflow.yml@main
+    uses: sm-techlabs/github-actions-toolkit/.github/workflows/my-workflow.yml@v1
     with:
       some-input: value
     secrets:
