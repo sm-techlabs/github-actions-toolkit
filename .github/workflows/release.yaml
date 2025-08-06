@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for accurate tagging
 
       - name: Run semantic release
         uses: go-semantic-release/action@v1
