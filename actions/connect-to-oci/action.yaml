@@ -16,18 +16,18 @@ runs:
     - name: Create .oci directory
       shell: bash
       run: |
-        mkdir -p ~/.oci
+        mkdir -p $HOME/.oci
 
     - name: Write OCI config
       shell: bash
       run: |
-        echo "${{ inputs.oci-config-file }}" > ~/.oci/config
+        echo "${{ inputs.oci-config-file }}" > $HOME/.oci/config
     
     - name: Validate key_file path in config
       shell: bash
       run: |
         expected_path="$HOME/.oci/oci_api_key.pem"
-        actual_path=$(awk -F'=' '/key_file/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' ~/.oci/config)
+        actual_path=$(awk -F'=' '/key_file/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' $HOME/.oci/config)
 
         if [ "$actual_path" != "$expected_path" ]; then
           echo "❌ Invalid key_file path in OCI config."
@@ -41,5 +41,5 @@ runs:
     - name: Write OCI private key
       shell: bash
       run: |
-        echo "${{ inputs.oci-private-key }}" > ~/.oci/oci_api_key.pem
-        chmod 600 ~/.oci/oci_api_key.pem
+        echo "${{ inputs.oci-private-key }}" > $HOME/.oci/oci_api_key.pem
+        chmod 600 $HOME/.oci/oci_api_key.pem
