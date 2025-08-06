@@ -7,16 +7,44 @@ on:
 
 permissions:
   contents: write
+  issues: read
+  pull-requests: read
 
 jobs:
   release:
+    name: Semantic Release
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Release with go-semantic-release
+      - name: Run semantic release
         uses: go-semantic-release/action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        
+
+      - name: Tag v1 and v1.2
+        if: success()
+        run: |
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          echo "Latest tag: $LATEST_TAG"
+
+          # Strip leading v if needed
+          CLEAN_TAG=${LATEST_TAG#v}
+
+          MAJOR=$(echo $CLEAN_TAG | cut -d. -f1)
+          MINOR=$(echo $CLEAN_TAG | cut -d. -f1-2)
+
+          MAJOR_TAG="v$MAJOR"
+          MINOR_TAG="v$MINOR"
+
+          echo "Tagging $MINOR_TAG and $MAJOR_TAG"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git tag -f "$MINOR_TAG"
+          git tag -f "$MAJOR_TAG"
+          git push origin "$MINOR_TAG" --force
+          git push origin "$MAJOR_TAG" --force
