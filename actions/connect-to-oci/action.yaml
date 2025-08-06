@@ -1,0 +1,45 @@
+name: Connect to OCI
+description: Sets up OCI config and private key from GitHub Secrets
+author: Sam Mosios
+
+inputs:
+  oci-config-file:
+    description: The contents of the OCI config file
+    required: true
+  oci-private-key:
+    description: The contents of the OCI private key file
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create .oci directory
+      shell: bash
+      run: |
+        mkdir -p ~/.oci
+
+    - name: Write OCI config
+      shell: bash
+      run: |
+        echo "${{ inputs.oci-config-file }}" > ~/.oci/config
+    
+    - name: Validate key_file path in config
+      shell: bash
+      run: |
+        expected_path="$HOME/.oci/oci_api_key.pem"
+        actual_path=$(awk -F'=' '/key_file/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print $2}' ~/.oci/config)
+
+        if [ "$actual_path" != "$expected_path" ]; then
+          echo "❌ Invalid key_file path in OCI config."
+          echo "Expected: $expected_path"
+          echo "Found:    $actual_path"
+          exit 1
+        fi
+
+        echo "✅ key_file path is valid."
+
+    - name: Write OCI private key
+      shell: bash
+      run: |
+        echo "${{ inputs.oci-private-key }}" > ~/.oci/oci_api_key.pem
+        chmod 600 ~/.oci/oci_api_key.pem
